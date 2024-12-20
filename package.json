@@ -1,0 +1,19 @@
+{
+  "name": "backend-letsgo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aksh10x/backend-letsgo.git"
+  },
+  "author": "me",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aksh10x/backend-letsgo/issues"
+  },
+  "homepage": "https://github.com/Aksh10x/backend-letsgo#readme",
+  "description": ""
+}
