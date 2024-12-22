@@ -23,4 +23,11 @@ app.use(express.static('public')); //to store public assets in the server(backen
 
 app.use(cookieParser()); //perform crud operations on cookies of client
 
+//routes import
+import userRouter from "./routes/user.routes.js";
+
+//router import
+app.use("/api/v1/users", userRouter)
+
+
 export {app};

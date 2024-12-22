@@ -10,3 +10,5 @@ class ApiResponse {
         this.success = true
     }
 }
+
+export {ApiResponse};
