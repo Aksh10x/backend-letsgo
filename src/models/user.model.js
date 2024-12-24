@@ -57,7 +57,7 @@ userSchema.pre('save', async function( next ){    //pre = middleware before savi
 })
 
 userSchema.methods.isPasswordCorrect = async function(password) {
-   
+
     return await bcrypt.compare(password, this.password)
 }
 

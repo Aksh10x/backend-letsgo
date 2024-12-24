@@ -144,7 +144,7 @@ const logoutUser = asyncHandler(async(req,res) => {
     await User.findByIdAndUpdate(req.user._id, 
         {
             $set: {
-                refreshToken: undefined,
+                refreshToken: null,
             } 
         },
         {
@@ -222,7 +222,7 @@ const updateUserAvatar = asyncHandler(async(req,res) => {
 
     const newAvatar = await uploadOnCloudinary(newAvatarLocalPath)
 
-    if(!avatar.url){
+    if(!newAvatar.url){
         throw new ApiError(401,"Error while uploading avatar")
     }
 
@@ -354,17 +354,22 @@ const getWatchHistory = asyncHandler(async(req,res) => {
                             localField: "owner",
                             foreignField: "_id",
                             as: "owner",
-                            pipeline: {
-                                $project: {
-                                    fullName: 1,
-                                    avatar: 1,
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        avatar: 1,
+                                    }
                                 },
-                                $addFields: {
-                                    owner: {
-                                        $first: "$owner"
+                                {
+                                    $addFields: {
+                                        owner: {
+                                            $first: "$owner"
+                                        }
                                     }
                                 }
-                            }
+                                
+                            ]
                         }
                     }
                 ]
@@ -375,7 +380,7 @@ const getWatchHistory = asyncHandler(async(req,res) => {
     return res.status(200).json(
         new ApiResponse(200, user?.[0].watchHistory,"User watch history retrieved successfully")
     )
-})
+});
 
 export {
     registerUser,
