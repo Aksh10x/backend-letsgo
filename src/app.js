@@ -25,9 +25,11 @@ app.use(cookieParser()); //perform crud operations on cookies of client
 
 //routes import
 import userRouter from "./routes/user.routes.js";
+import videoRouter from "./routes/video.routes.js"
 
 //router import
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/videos", videoRouter)
 
 
 export {app};
