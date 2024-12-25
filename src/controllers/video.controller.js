@@ -16,8 +16,10 @@ const publishVideo = asyncHandler(async(req,res) => {
         throw new ApiError(400,"Title and Descreption are required fields")
     }
 
-    const thumbnailLocalPath = req.files?.thumbnail[0].path 
-    const videoLocalPath = req.files?.video[0].path 
+    
+    const thumbnailLocalPath = await req.files?.thumbnail?.[0].path 
+    const videoLocalPath = await req.files?.video?.[0].path 
+    console.log(thumbnailLocalPath,"\n",videoLocalPath)
 
 
     if(!(thumbnailLocalPath || videoLocalPath)){
@@ -69,16 +71,15 @@ const updateVideo = asyncHandler(async(req,res) => {
     const video = await Video.findById(videoId)
 
     if(!video){
-        throw new ApiError(401,"You must be owner of the video to update it")
+        throw new ApiError(400,"Video id is invalid")
     }
 
-    console.log(video.owner,"\n",req.user._id)
     if(video.owner.toString() !== req.user._id.toString()){
         throw new ApiError(401,"Unauthorized access")
     }
 
     const {newTitle, newDescription} = req.body
-    const newThumbnailLocalPath = req.file?.path
+    const newThumbnailLocalPath = req.file ? req.file?.path : ""
 
     if([newTitle,newDescription].some((field) => {
         field?.trim() === ""
@@ -106,8 +107,104 @@ const updateVideo = asyncHandler(async(req,res) => {
 
 })
 
+const togglePublishStatus = asyncHandler(async(req,res) => {
+    const {videoId} = req.params
+
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new ApiError(400,"Video id is invalid")
+    }
+    
+    if(video.owner.toString() !== req.user._id.toString()){
+        throw new ApiError(401, "Unauthorized access")
+    }
+
+    video.isPublished = req.body.isPublished
+
+    await video.save({validateBeforeSave: false})
+
+    res.status(200).json(
+        new ApiResponse(200,{isPublished: req.body.isPublished}, "Publish status updated")
+    )
+})
+
+const getAllVideos = asyncHandler(async(req,res) => {
+    const { page = 1, limit = 1, query, sortBy = "likes", sortType = -1 , userId } = req.query
+
+    const options = {page, limit}
+
+
+    const userQuery = query ? {
+        $or: [
+            {title: {
+                $regex: query,
+                $options: "i",
+            }},
+            {description: {
+                $regex: query,
+                $options: "i",
+            }}
+        ]
+    } : {}
+    
+    const pipeline = [
+        {
+            $match: userQuery,
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "createdBy",
+            }
+        },
+        {
+            $unwind: "$createdBy"
+        },
+        {
+            $project: {
+                title: 1,
+                description: 1,
+                thumbnail: 1,
+                videoFile: 1,
+                createdBy: {
+                    fullName: 1,
+                    avatar: 1,
+                    username: 1,
+                }
+            }
+        },
+        {
+            $sort: {
+                [sortBy]: sortType === "asc" ? 1 : -1,
+            }
+        },
+
+    ]
+
+    // if(userId){
+        
+    // }
+
+    try {
+        const paginatedVideos = await Video.aggregatePaginate(pipeline, options)
+        return res.status(200).json(
+            new ApiResponse(200,paginatedVideos,"Videos successfully retrieved")
+        )
+    } catch (error) {
+        throw new ApiError(500,"Something went wrong while paginating")
+    }
+
+    
+
+})
+
 export {
     publishVideo,
     getVideoById,
-    updateVideo
+    updateVideo,
+    togglePublishStatus,
+    getAllVideos
 }
