@@ -161,9 +161,45 @@ const deleteVideoFromPlaylist = asyncHandler(async(req,res) => {
     )
 })
 
+const getPlaylistById = asyncHandler(async(req,res) => { //aggregation left for user and videos match with id, 1 lookup for user
+    const {playlistId} = req.params                      //2 lookup for videos and nested lookup for owner of video
+
+    const playlist = await Playlist.findById(playlistId)
+
+    if(!playlist){
+        throw new ApiError(400,"Playlist does not exist")
+    }
+
+    res.status(200).json(
+        new ApiResponse(200,playlist,"Playlist successfully retrieved")
+    )
+})
+
+const deletePlaylist = asyncHandler(async(req,res) => {
+    const {playlistId} = req.params
+
+    const playlist = await Playlist.findById(playlistId)
+
+    if(!playlist){
+        throw new ApiError(400,"Playlist or video does not exist")
+    }
+
+    if(playlist.owner.toString() !== req.user._id.toString()){
+        throw new ApiError(401,"Unauthorized access")
+    }
+
+    await Playlist.findByIdAndDelete(playlistId)
+
+    return res.status(200).json(
+        new ApiResponse(200,{},"Playlist deleted successfully")
+    )
+})
+
 export {
     createPlaylist,
     getUserPlaylists,
     addVideoToPlaylist,
-    deleteVideoFromPlaylist
+    deleteVideoFromPlaylist,
+    getPlaylistById,
+    deletePlaylist
 }
