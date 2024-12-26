@@ -14,4 +14,6 @@ connectDB()
     })
 
 )
-.catch();                                                         
+.catch(
+    
+);                                                         
