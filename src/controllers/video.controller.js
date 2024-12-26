@@ -1,10 +1,8 @@
 import {asyncHandler} from "../utils/asyncHandler.js";
-import mongoose from "mongoose";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { Video } from "../models/video.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { User } from "../models/user.model.js";
 
 const publishVideo = asyncHandler(async(req,res) => {
     const {title, description} = req.body

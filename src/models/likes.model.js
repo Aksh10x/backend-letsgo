@@ -13,6 +13,10 @@ const likeSchema = new Schema({
     tweet: {
         type: Schema.Types.ObjectId,
         ref: "Tweet"
+    },
+    comment: {
+        type: Schema.Types.ObjectId,
+        ref: "Comment"
     }
 },{timestamps: true})
 
